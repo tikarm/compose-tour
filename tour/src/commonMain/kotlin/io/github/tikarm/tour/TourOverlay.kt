@@ -1,0 +1,318 @@
+package io.github.tikarm.tour
+
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationVector
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.TwoWayConverter
+import androidx.compose.animation.core.VectorConverter
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathFillType
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
+import kotlin.math.roundToInt
+import kotlinx.coroutines.flow.collectLatest
+
+private const val FadeMillis = 200
+private const val TipEnterMillis = 220
+private const val TipInitialScale = 0.96f
+
+/** Sizes and spacing of [TourOverlay]'s cutout and tip. */
+@Immutable
+public data class TourOverlayDimensions(
+    /** Space between the target's bounds and the cutout's edge. */
+    val cutoutPadding: Dp = 6.dp,
+    val cutoutRadius: Dp = 12.dp,
+    /** Keeps the cutout off the window edges, so a target at the edge does not get a clipped highlight. */
+    val cutoutEdgeMargin: Dp = 4.dp,
+    val ringWidth: Dp = 2.dp,
+    /** The tip stays at least this far from the overlay's edges. */
+    val tipMargin: Dp = 16.dp,
+    /** Space between the cutout and the tip. */
+    val tipGap: Dp = 12.dp,
+)
+
+public object TourOverlayDefaults {
+    /** The current [MaterialTheme]'s scrim, darker than a dialog's so the cutout stands out. */
+    public val ScrimColor: Color
+        @Composable
+        @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.scrim.copy(alpha = 0.6f)
+
+    public val Dimensions: TourOverlayDimensions = TourOverlayDimensions()
+}
+
+/**
+ * Dims everything except [target]'s element and shows [tip] next to it. Covers the whole window it
+ * is placed in and blocks touches underneath, so the [tip] content decides how the tour moves on.
+ *
+ * A null [target] hides the overlay. It fades in and out, and moving to another target glides the
+ * cutout there, with the tip travelling along. How the tip's content changes is up to [tip].
+ * When the target is not on screen (a hidden or scrolled away element), the tip shows in the middle
+ * without a cutout.
+ *
+ * Targets are found in [targets], which must belong to the same window as the overlay: a dialog or
+ * bottom sheet opens in its own window and needs its own [TourTargets] and overlay.
+ *
+ * [ringColor] outlines the cutout; null leaves it without an outline.
+ */
+@Composable
+public fun <K : Any> TourOverlay(
+    target: K?,
+    targets: TourTargets<K>,
+    modifier: Modifier = Modifier,
+    scrimColor: Color = TourOverlayDefaults.ScrimColor,
+    ringColor: Color? = null,
+    dimensions: TourOverlayDimensions = TourOverlayDefaults.Dimensions,
+    tip: @Composable (K) -> Unit,
+) {
+    // Keeps the last target while the overlay fades out after the tour ends
+    val lastTarget = remember { LastValue<K>() }
+    if (target != null) lastTarget.value = target
+
+    AnimatedVisibility(
+        visible = target != null,
+        modifier = modifier,
+        enter = fadeIn(tween(FadeMillis)),
+        exit = fadeOut(tween(FadeMillis)),
+    ) {
+        val shownTarget = target ?: lastTarget.value ?: return@AnimatedVisibility
+        OverlayContent(
+            target = shownTarget,
+            targets = targets,
+            scrimColor = scrimColor,
+            ringColor = ringColor,
+            dimensions = dimensions,
+            // The tip grows in as the overlay opens; changing steps is up to the tip itself
+            tipModifier = Modifier.animateEnterExit(
+                enter = scaleIn(tween(TipEnterMillis), initialScale = TipInitialScale),
+                exit = ExitTransition.None,
+            ),
+            tip = tip,
+        )
+    }
+}
+
+@Composable
+private fun <K : Any> OverlayContent(
+    target: K,
+    targets: TourTargets<K>,
+    scrimColor: Color,
+    ringColor: Color?,
+    dimensions: TourOverlayDimensions,
+    tipModifier: Modifier,
+    tip: @Composable (K) -> Unit,
+) {
+    // Targets are measured from the window root; the overlay may not start there
+    var origin by remember { mutableStateOf(Offset.Zero) }
+    var overlaySize by remember { mutableStateOf(IntSize.Zero) }
+    var tipSize by remember { mutableStateOf(IntSize.Zero) }
+    val density = LocalDensity.current
+    val cutoutPadding = with(density) { dimensions.cutoutPadding.toPx() }
+    val edgeMargin = with(density) { dimensions.cutoutEdgeMargin.toPx() }
+    val tipMargin = with(density) { dimensions.tipMargin.roundToPx() }
+    val tipGap = with(density) { dimensions.tipGap.roundToPx() }
+
+    // Read inside the glides only, so moving targets redraw and relayout without recomposing
+    fun targetCutout(): Rect? = targets.boundsOf(target)
+        // A target scrolled fully out of view has empty bounds, so it counts as not on screen
+        ?.takeUnless { it.isEmpty }
+        ?.translate(-origin)
+        ?.inflate(cutoutPadding)
+        ?.keptInside(overlaySize, edgeMargin)
+
+    val cutout = rememberGlidingValue(key = target, converter = Rect.VectorConverter) { targetCutout() }
+    // Placed from where the cutout is going, not where it is mid glide, so the tip picks its side
+    // (below or above) once per target and glides there instead of jumping sides on the way
+    val tipPosition = rememberGlidingValue(key = target, converter = IntOffset.VectorConverter) {
+        tipPosition(targetCutout(), tipSize, overlaySize, tipMargin, tipGap)
+    }
+    val scrim = remember { Path() }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .onGloballyPositioned {
+                origin = it.positionInRoot()
+                overlaySize = it.size
+            }
+            .pointerInput(Unit) {
+                awaitPointerEventScope {
+                    while (true) {
+                        awaitPointerEvent().changes.forEach { it.consume() }
+                    }
+                }
+            }
+    ) {
+        Canvas(modifier = Modifier.matchParentSize()) {
+            val shownCutout = cutout.value
+            val cornerRadius = CornerRadius(dimensions.cutoutRadius.toPx())
+            scrim.reset()
+            scrim.fillType = PathFillType.EvenOdd
+            scrim.addRect(Rect(Offset.Zero, size))
+            if (shownCutout != null) {
+                scrim.addRoundRect(RoundRect(shownCutout, cornerRadius))
+            }
+            drawPath(scrim, scrimColor)
+            if (shownCutout != null && ringColor != null) {
+                drawRoundRect(
+                    color = ringColor,
+                    topLeft = shownCutout.topLeft,
+                    size = shownCutout.size,
+                    cornerRadius = cornerRadius,
+                    style = Stroke(width = dimensions.ringWidth.toPx()),
+                )
+            }
+        }
+
+        TipPlacement(position = { tipPosition.value ?: IntOffset.Zero }, margin = dimensions.tipMargin) {
+            Box(modifier = tipModifier.onSizeChanged { tipSize = it }) {
+                tip(target)
+            }
+        }
+    }
+}
+
+/**
+ * A value that glides to its target when the tour moves to another key, and follows the same key's
+ * own movement (a bottom sheet sliding up, for example) right away so it never lags behind it.
+ * It appears in place when there was nothing shown before, and is null while the target is.
+ */
+private class GlidingValue<T, V : AnimationVector>(private val converter: TwoWayConverter<T, V>) {
+    private var animatable: Animatable<T, V>? = null
+    private var isShown by mutableStateOf(false)
+    private var isGliding = false
+
+    /** Read in the draw or layout phase, so only that phase repeats while the value moves. */
+    val value: T? get() = if (isShown) animatable?.value else null
+
+    suspend fun moveTo(target: T?, startGlide: Boolean) {
+        if (target == null) {
+            isShown = false
+            return
+        }
+        val current = animatable ?: Animatable(target, converter).also { animatable = it }
+        if (!isShown) {
+            current.snapTo(target)
+            isShown = true
+            isGliding = false
+            return
+        }
+        // A glide that gets a new target mid way keeps going toward it with its current speed
+        if (startGlide) isGliding = true
+        if (isGliding) {
+            current.animateTo(
+                targetValue = target,
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioNoBouncy,
+                    stiffness = Spring.StiffnessMediumLow,
+                ),
+            )
+            isGliding = false
+        } else {
+            current.snapTo(target)
+        }
+    }
+}
+
+/** One coroutine per [key], following [target] as it changes, instead of one per change. */
+@Composable
+private fun <K, T, V : AnimationVector> rememberGlidingValue(
+    key: K,
+    converter: TwoWayConverter<T, V>,
+    target: () -> T?,
+): GlidingValue<T, V> {
+    val glide = remember { GlidingValue(converter) }
+    val currentTarget by rememberUpdatedState(target)
+    LaunchedEffect(key) {
+        var isFirstForKey = true
+        snapshotFlow { currentTarget() }.collectLatest { value ->
+            val startGlide = isFirstForKey
+            isFirstForKey = false
+            glide.moveTo(value, startGlide)
+        }
+    }
+    return glide
+}
+
+/** Holds a value across recompositions without being state, so writing it never recomposes. */
+private class LastValue<T>(var value: T? = null)
+
+private fun Rect.keptInside(size: IntSize, margin: Float): Rect {
+    if (size == IntSize.Zero) return this
+    val keptLeft = left.coerceAtLeast(margin)
+    val keptTop = top.coerceAtLeast(margin)
+    // A thin target at the very edge must not end up with its sides swapped
+    return Rect(
+        left = keptLeft,
+        top = keptTop,
+        right = right.coerceAtMost(size.width - margin).coerceAtLeast(keptLeft),
+        bottom = bottom.coerceAtMost(size.height - margin).coerceAtLeast(keptTop),
+    )
+}
+
+/**
+ * Where the tip goes for [cutout]: below it, above it when there is no room, or centered without
+ * one. Horizontally it is centered on the cutout, kept within the margins.
+ */
+private fun tipPosition(cutout: Rect?, tip: IntSize, area: IntSize, margin: Int, gap: Int): IntOffset {
+    val centeredX = cutout?.center?.x?.roundToInt()?.minus(tip.width / 2) ?: ((area.width - tip.width) / 2)
+    val x = centeredX.coerceIn(margin, (area.width - margin - tip.width).coerceAtLeast(margin))
+    val y = when {
+        cutout == null -> (area.height - tip.height) / 2
+        cutout.bottom + gap + tip.height <= area.height - margin -> (cutout.bottom + gap).roundToInt()
+        else -> (cutout.top - gap - tip.height).roundToInt().coerceAtLeast(margin)
+    }
+    return IntOffset(x, y)
+}
+
+/** Measures the tip within the side margins and places it at [position], read while placing. */
+@Composable
+private fun TipPlacement(position: () -> IntOffset, margin: Dp, content: @Composable () -> Unit) {
+    Layout(content = content, modifier = Modifier.fillMaxSize()) { measurables, constraints ->
+        require(constraints.hasBoundedWidth && constraints.hasBoundedHeight) {
+            "TourOverlay needs a bounded size; place it in a layout that gives it one"
+        }
+        val maxTipWidth = (constraints.maxWidth - 2 * margin.roundToPx()).coerceAtLeast(0)
+        val tip = measurables.first().measure(Constraints(maxWidth = maxTipWidth))
+        layout(constraints.maxWidth, constraints.maxHeight) {
+            tip.place(position())
+        }
+    }
+}
