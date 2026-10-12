@@ -17,3 +17,5 @@ dependencyResolutionManagement {
 rootProject.name = "compose-tour"
 
 include(":tour")
+include(":sample:shared")
+include(":sample:android")
