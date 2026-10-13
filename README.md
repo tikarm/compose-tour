@@ -77,3 +77,7 @@ restart the tour and switch between light and dark.
 The `tour` module uses [gradle-maven-publish-plugin](https://github.com/vanniktech/gradle-maven-publish-plugin).
 `./gradlew publishToMavenLocal` works without setup. Releasing to Maven Central needs a Central
 Portal account and signing keys in `~/.gradle/gradle.properties`.
+
+## License
+
+Apache License 2.0. See [LICENSE](LICENSE).
