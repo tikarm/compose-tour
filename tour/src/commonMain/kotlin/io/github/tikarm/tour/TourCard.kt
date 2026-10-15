@@ -79,30 +79,125 @@ private object TourText {
     val Next = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold)
 }
 
-/** Colors of [TourCard] and [TourCardText]. */
+/**
+ * Colors of [TourCard] and [TourCardText]. [TourCardDefaults.colors] makes one from the current
+ * theme.
+ *
+ * Not a data class, so fields can be added later without breaking apps built against an older
+ * version.
+ */
 @Immutable
-public data class TourCardColors(
-    val card: Color,
-    val shadow: Color,
-    val title: Color,
-    val body: Color,
-    val counter: Color,
-    val skip: Color,
-    val nextBackground: Color,
-    val nextText: Color,
-    val dotActive: Color,
-    val dotDone: Color,
-    val dotIdle: Color,
-)
+public class TourCardColors(
+    public val card: Color,
+    public val shadow: Color,
+    public val title: Color,
+    public val body: Color,
+    public val counter: Color,
+    public val skip: Color,
+    public val nextBackground: Color,
+    public val nextText: Color,
+    public val dotActive: Color,
+    public val dotDone: Color,
+    public val dotIdle: Color,
+) {
+    public fun copy(
+        card: Color = this.card,
+        shadow: Color = this.shadow,
+        title: Color = this.title,
+        body: Color = this.body,
+        counter: Color = this.counter,
+        skip: Color = this.skip,
+        nextBackground: Color = this.nextBackground,
+        nextText: Color = this.nextText,
+        dotActive: Color = this.dotActive,
+        dotDone: Color = this.dotDone,
+        dotIdle: Color = this.dotIdle,
+    ): TourCardColors = TourCardColors(
+        card = card,
+        shadow = shadow,
+        title = title,
+        body = body,
+        counter = counter,
+        skip = skip,
+        nextBackground = nextBackground,
+        nextText = nextText,
+        dotActive = dotActive,
+        dotDone = dotDone,
+        dotIdle = dotIdle,
+    )
 
-/** Button texts of [TourCard]. [finish] replaces [next] on the last step. */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is TourCardColors) return false
+        return card == other.card &&
+            shadow == other.shadow &&
+            title == other.title &&
+            body == other.body &&
+            counter == other.counter &&
+            skip == other.skip &&
+            nextBackground == other.nextBackground &&
+            nextText == other.nextText &&
+            dotActive == other.dotActive &&
+            dotDone == other.dotDone &&
+            dotIdle == other.dotIdle
+    }
+
+    override fun hashCode(): Int {
+        var result = card.hashCode()
+        result = 31 * result + shadow.hashCode()
+        result = 31 * result + title.hashCode()
+        result = 31 * result + body.hashCode()
+        result = 31 * result + counter.hashCode()
+        result = 31 * result + skip.hashCode()
+        result = 31 * result + nextBackground.hashCode()
+        result = 31 * result + nextText.hashCode()
+        result = 31 * result + dotActive.hashCode()
+        result = 31 * result + dotDone.hashCode()
+        result = 31 * result + dotIdle.hashCode()
+        return result
+    }
+
+    override fun toString(): String =
+        "TourCardColors(card=$card, shadow=$shadow, title=$title, body=$body, counter=$counter, " +
+            "skip=$skip, nextBackground=$nextBackground, nextText=$nextText, dotActive=$dotActive, " +
+            "dotDone=$dotDone, dotIdle=$dotIdle)"
+}
+
+/**
+ * Button texts of [TourCard]. [finish] replaces [next] on the last step.
+ *
+ * Not a data class, so fields can be added later without breaking apps built against an older
+ * version.
+ */
 @Immutable
-public data class TourCardLabels(
-    val skip: String = "Skip",
-    val next: String = "Next",
-    val finish: String = "Finish",
-)
+public class TourCardLabels(
+    public val skip: String = "Skip",
+    public val next: String = "Next",
+    public val finish: String = "Finish",
+) {
+    public fun copy(
+        skip: String = this.skip,
+        next: String = this.next,
+        finish: String = this.finish,
+    ): TourCardLabels = TourCardLabels(skip = skip, next = next, finish = finish)
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is TourCardLabels) return false
+        return skip == other.skip && next == other.next && finish == other.finish
+    }
+
+    override fun hashCode(): Int {
+        var result = skip.hashCode()
+        result = 31 * result + next.hashCode()
+        result = 31 * result + finish.hashCode()
+        return result
+    }
+
+    override fun toString(): String = "TourCardLabels(skip=$skip, next=$next, finish=$finish)"
+}
+
+/** Default values for [TourCard] and [TourCardText]. */
 public object TourCardDefaults {
     /**
      * Colors taken from the current [MaterialTheme], so the card follows the app's theme, light or
@@ -144,7 +239,7 @@ public object TourCardDefaults {
  * [step] is 0-based, out of [stepCount]. [content] is shown for each step and slides like a pager
  * when the step changes; [TourCardText] fits it for a title and a message.
  * [stepGroups] splits the dots into groups by size, like a photo carousel; by default it is one
- * group of all steps.
+ * group of all steps. Its sizes must add up to [stepCount].
  */
 @Composable
 public fun TourCard(
@@ -159,6 +254,9 @@ public fun TourCard(
     stepGroups: List<Int> = listOf(stepCount),
     content: @Composable (step: Int) -> Unit,
 ) {
+    require(stepGroups.sum() == stepCount) {
+        "stepGroups $stepGroups add up to ${stepGroups.sum()}, but stepCount is $stepCount"
+    }
     val isLast = step >= stepCount - 1
     // Moves only the step's content, like a pager; the card itself stays in place
     val swipe = rememberSwipeState()

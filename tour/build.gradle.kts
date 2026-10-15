@@ -21,10 +21,11 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(compose.runtime)
+            // The public API uses their types (Modifier, Color, Dp, Rect, @Composable)
+            api(compose.runtime)
+            api(compose.ui)
             implementation(compose.foundation)
             implementation(compose.animation)
-            implementation(compose.ui)
             implementation(compose.material3)
         }
     }
