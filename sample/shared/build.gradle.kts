@@ -26,7 +26,6 @@ kotlin {
             implementation(compose.foundation)
             implementation(compose.material3)
             implementation(compose.materialIconsExtended)
-            implementation(libs.compose.ui.backhandler)
         }
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)

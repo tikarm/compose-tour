@@ -36,9 +36,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import io.github.tikarm.tour.TourCard
@@ -53,7 +51,7 @@ private const val HighlightedTask = 14
 private enum class Step(val title: String, val message: String) {
     Progress("Your progress", "See how many tasks are **done** at a glance."),
     Task("A task", "Tick the box to mark a task done. The list scrolls here so the highlight can follow it."),
-    Add("Add a task", "Tap **+** to write down something new."),
+    Add("Add a task", "Use **+** to write down something new."),
     Theme("Light or dark", "Switch the theme here. The tour card follows it too."),
     Done("You're all set", "This step has no target, so the card shows in the middle."),
 }
@@ -69,7 +67,7 @@ private val initialTasks = listOf(
     "Sort old photos", "Renew the passport", "Change bed sheets", "Try a new recipe",
 ).mapIndexed { index, title -> Task(title, isDone = index % 3 == 0) }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SampleApp() {
     var isDark by remember { mutableStateOf(false) }
@@ -82,13 +80,12 @@ fun SampleApp() {
     LaunchedEffect(step) {
         if (step == Step.Task) listState.animateScrollToItem(HighlightedTask)
     }
-    // Back (or Esc on desktop) skips the tour instead of acting on the screen underneath
-    BackHandler(enabled = step != null) { step = null }
-
     MaterialTheme(colorScheme = if (isDark) darkColorScheme() else lightColorScheme()) {
         TourHost(
             target = step,
             targets = targets,
+            // Back (or Esc on desktop) skips the tour instead of acting on the screen underneath
+            onDismissRequest = { step = null },
             tip = { shown ->
                 TourCard(
                     step = shown.ordinal,

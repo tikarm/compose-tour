@@ -65,8 +65,12 @@ TourHost(
   `TourCardDefaults.colors(nextBackground = ...)`, and the button texts with `labels`.
 - In `TourCardText`, text wrapped in `**` is shown in bold.
 - The overlay blocks all touches underneath, including on the highlighted element, so tips should
-  not ask users to tap it. The back button is up to the app (for example a `BackHandler` that
-  skips the tour).
+  not ask users to tap it.
+- Pass `onDismissRequest = { step = null }` to end the tour on the system back action (Esc on
+  desktop). Without it, back handling is up to the app.
+- While the tour is shown, `TourHost` hides the screen from screen readers, so they only reach the
+  tip. `TourCard` has an optional Back button (`showPreviousButton = true`), and screen readers get
+  a Back action on it either way.
 
 ### Dialogs and bottom sheets
 

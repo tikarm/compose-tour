@@ -28,7 +28,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -45,6 +47,9 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
@@ -147,7 +152,14 @@ public object TourOverlayDefaults {
  * bottom sheet opens in its own window and needs its own [TourTargets] and overlay.
  *
  * [ringColor] outlines the cutout; null leaves it without an outline.
+ *
+ * [onDismissRequest] is called on the system back action (Esc on desktop) while the overlay is
+ * shown, usually to end the tour. Null leaves back handling to the app.
+ *
+ * Screen readers announce the tip when it appears or changes. The overlay cannot hide the elements
+ * under it from screen readers; [TourHost] does that for the screen it wraps.
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 public fun <K : Any> TourOverlay(
     target: K?,
@@ -156,11 +168,18 @@ public fun <K : Any> TourOverlay(
     scrimColor: Color = TourOverlayDefaults.ScrimColor,
     ringColor: Color? = null,
     dimensions: TourOverlayDimensions = TourOverlayDefaults.Dimensions,
+    onDismissRequest: (() -> Unit)? = null,
     tip: @Composable (K) -> Unit,
 ) {
     // Keeps the last target while the overlay fades out after the tour ends
     val lastTarget = remember { LastValue<K>() }
     if (target != null) lastTarget.value = target
+
+    // Added only while the tour is shown: on Android the newest back handler wins, so this one
+    // beats any the screen added since it was first composed
+    if (onDismissRequest != null && target != null) {
+        BackHandler(onBack = onDismissRequest)
+    }
 
     AnimatedVisibility(
         visible = target != null,
@@ -277,7 +296,12 @@ private fun <K : Any> OverlayContent(
         }
 
         TipPlacement(area = ::tipArea, position = { tipPosition.value ?: IntOffset.Zero }) {
-            Box(modifier = tipModifier.onSizeChanged { tipSize = it }) {
+            Box(
+                modifier = tipModifier
+                    .onSizeChanged { tipSize = it }
+                    // Screen readers read the tip out when it appears and when its content changes
+                    .semantics { liveRegion = LiveRegionMode.Polite },
+            ) {
                 tip(target)
             }
         }
