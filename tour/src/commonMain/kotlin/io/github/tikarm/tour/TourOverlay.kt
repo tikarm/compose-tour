@@ -53,21 +53,68 @@ private const val FadeMillis = 200
 private const val TipEnterMillis = 220
 private const val TipInitialScale = 0.96f
 
-/** Sizes and spacing of [TourOverlay]'s cutout and tip. */
+/**
+ * Sizes and spacing of [TourOverlay]'s cutout and tip.
+ *
+ * Not a data class, so fields can be added later without breaking apps built against an older
+ * version.
+ */
 @Immutable
-public data class TourOverlayDimensions(
+public class TourOverlayDimensions(
     /** Space between the target's bounds and the cutout's edge. */
-    val cutoutPadding: Dp = 6.dp,
-    val cutoutRadius: Dp = 12.dp,
+    public val cutoutPadding: Dp = 6.dp,
+    public val cutoutRadius: Dp = 12.dp,
     /** Keeps the cutout off the window edges, so a target at the edge does not get a clipped highlight. */
-    val cutoutEdgeMargin: Dp = 4.dp,
-    val ringWidth: Dp = 2.dp,
+    public val cutoutEdgeMargin: Dp = 4.dp,
+    public val ringWidth: Dp = 2.dp,
     /** The tip stays at least this far from the overlay's edges. */
-    val tipMargin: Dp = 16.dp,
+    public val tipMargin: Dp = 16.dp,
     /** Space between the cutout and the tip. */
-    val tipGap: Dp = 12.dp,
-)
+    public val tipGap: Dp = 12.dp,
+) {
+    public fun copy(
+        cutoutPadding: Dp = this.cutoutPadding,
+        cutoutRadius: Dp = this.cutoutRadius,
+        cutoutEdgeMargin: Dp = this.cutoutEdgeMargin,
+        ringWidth: Dp = this.ringWidth,
+        tipMargin: Dp = this.tipMargin,
+        tipGap: Dp = this.tipGap,
+    ): TourOverlayDimensions = TourOverlayDimensions(
+        cutoutPadding = cutoutPadding,
+        cutoutRadius = cutoutRadius,
+        cutoutEdgeMargin = cutoutEdgeMargin,
+        ringWidth = ringWidth,
+        tipMargin = tipMargin,
+        tipGap = tipGap,
+    )
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is TourOverlayDimensions) return false
+        return cutoutPadding == other.cutoutPadding &&
+            cutoutRadius == other.cutoutRadius &&
+            cutoutEdgeMargin == other.cutoutEdgeMargin &&
+            ringWidth == other.ringWidth &&
+            tipMargin == other.tipMargin &&
+            tipGap == other.tipGap
+    }
+
+    override fun hashCode(): Int {
+        var result = cutoutPadding.hashCode()
+        result = 31 * result + cutoutRadius.hashCode()
+        result = 31 * result + cutoutEdgeMargin.hashCode()
+        result = 31 * result + ringWidth.hashCode()
+        result = 31 * result + tipMargin.hashCode()
+        result = 31 * result + tipGap.hashCode()
+        return result
+    }
+
+    override fun toString(): String =
+        "TourOverlayDimensions(cutoutPadding=$cutoutPadding, cutoutRadius=$cutoutRadius, " +
+            "cutoutEdgeMargin=$cutoutEdgeMargin, ringWidth=$ringWidth, tipMargin=$tipMargin, tipGap=$tipGap)"
+}
+
+/** Default values for [TourOverlay] and [TourHost]. */
 public object TourOverlayDefaults {
     /** The current [MaterialTheme]'s scrim, darker than a dialog's so the cutout stands out. */
     public val ScrimColor: Color
@@ -75,6 +122,7 @@ public object TourOverlayDefaults {
         @ReadOnlyComposable
         get() = MaterialTheme.colorScheme.scrim.copy(alpha = 0.6f)
 
+    /** The default sizes; use [TourOverlayDimensions.copy] on it to change just some of them. */
     public val Dimensions: TourOverlayDimensions = TourOverlayDimensions()
 }
 

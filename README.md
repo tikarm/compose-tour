@@ -6,6 +6,23 @@ the cutout and the tip to the new element.
 
 Targets: Android, iOS, desktop (JVM).
 
+## Installation
+
+Not on Maven Central yet. Once it is released, add it to your shared module's `commonMain`:
+
+```kotlin
+kotlin {
+    sourceSets {
+        commonMain.dependencies {
+            implementation("io.github.tikarm:compose-tour:0.1.0")
+        }
+    }
+}
+```
+
+To try it before the release, run `./gradlew :tour:publishToMavenLocal` in this repository, add
+`mavenLocal()` to your project's repositories, and use version `0.1.0-SNAPSHOT`.
+
 ## Usage
 
 ```kotlin
@@ -25,7 +42,7 @@ TourHost(
             onPrevious = { step = Step.entries.getOrNull(shown.ordinal - 1) },
             onSkip = { step = null },
         ) { index ->
-            TourCardText(title = "Step ${index + 1}", message = "Tap **Add** to continue.")
+            TourCardText(title = "Step ${index + 1}", message = "**Add** creates a new task.")
         }
     },
 ) {
@@ -47,8 +64,9 @@ TourHost(
   current `MaterialTheme`, so they follow your app's theme, light or dark. Change any of them with
   `TourCardDefaults.colors(nextBackground = ...)`, and the button texts with `labels`.
 - In `TourCardText`, text wrapped in `**` is shown in bold.
-- The overlay blocks touches underneath, so the back button is up to the app (for example a
-  `BackHandler` that skips the tour).
+- The overlay blocks all touches underneath, including on the highlighted element, so tips should
+  not ask users to tap it. The back button is up to the app (for example a `BackHandler` that
+  skips the tour).
 
 ### Dialogs and bottom sheets
 

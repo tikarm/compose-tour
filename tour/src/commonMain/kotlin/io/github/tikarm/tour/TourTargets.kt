@@ -17,13 +17,19 @@ import androidx.compose.ui.node.requireLayoutCoordinates
  * Use one instance per window: a dialog or bottom sheet opens in its own window and needs its own.
  */
 @Stable
-public class TourTargets<K> {
+public class TourTargets<K : Any> {
     private val bounds = mutableStateMapOf<K, Rect>()
 
     // Which element registered each key. Two elements can briefly share one (a list row handing
     // the target to another), so only the current owner may remove it.
     private val owners = mutableMapOf<K, Any>()
 
+    /**
+     * Where [key]'s element is, in root coordinates of its window, or null when no element on
+     * screen is marked with it. Clipped by the element's parents, so it is empty when the element
+     * is scrolled fully out of view. Reading it inside composition, layout or drawing updates that
+     * part when the element moves.
+     */
     public fun boundsOf(key: K): Rect? = bounds[key]
 
     internal fun update(key: K, rect: Rect, owner: Any) {
@@ -39,14 +45,18 @@ public class TourTargets<K> {
     }
 }
 
+/**
+ * Creates a [TourTargets] that keeps its targets across recompositions. Elements are added to it
+ * with [tourTarget], and [TourHost] or [TourOverlay] reads it to find the current step's element.
+ */
 @Composable
-public fun <K> rememberTourTargets(): TourTargets<K> = remember { TourTargets() }
+public fun <K : Any> rememberTourTargets(): TourTargets<K> = remember { TourTargets() }
 
 /** Marks this element as the target of [key]. It stops being a target once it leaves the screen. */
-public fun <K> Modifier.tourTarget(key: K, targets: TourTargets<K>): Modifier =
+public fun <K : Any> Modifier.tourTarget(key: K, targets: TourTargets<K>): Modifier =
     this then TourTargetElement(key, targets)
 
-private data class TourTargetElement<K>(
+private data class TourTargetElement<K : Any>(
     val key: K,
     val targets: TourTargets<K>,
 ) : ModifierNodeElement<TourTargetNode<K>>() {
@@ -55,7 +65,7 @@ private data class TourTargetElement<K>(
     override fun update(node: TourTargetNode<K>) = node.update(key, targets)
 }
 
-private class TourTargetNode<K>(
+private class TourTargetNode<K : Any>(
     private var key: K,
     private var targets: TourTargets<K>,
 ) : Modifier.Node(), GlobalPositionAwareModifierNode {
