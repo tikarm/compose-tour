@@ -50,10 +50,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
@@ -70,14 +68,6 @@ private val SwipeThreshold = 72.dp
 private const val PageSlideMillis = 250
 /** How much a swipe toward a missing step still moves the card, as a hint that it is the end. */
 private const val EdgeResistance = 0.25f
-
-private object TourText {
-    val Counter = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = 0.5.sp)
-    val Title = TextStyle(fontSize = 17.sp, lineHeight = 24.sp, fontWeight = FontWeight.Bold)
-    val Body = TextStyle(fontSize = 14.sp, lineHeight = 20.sp)
-    val Skip = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-    val Next = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold)
-}
 
 /**
  * Colors of [TourCard] and [TourCardText]. [TourCardDefaults.colors] makes one from the current
@@ -197,8 +187,81 @@ public class TourCardLabels(
     override fun toString(): String = "TourCardLabels(skip=$skip, next=$next, finish=$finish)"
 }
 
+/**
+ * Text styles of [TourCard] and [TourCardText]. [TourCardDefaults.textStyles] makes one from the
+ * current theme. Their colors are ignored; [TourCardColors] sets those.
+ *
+ * Not a data class, so fields can be added later without breaking apps built against an older
+ * version.
+ */
+@Immutable
+public class TourCardTextStyles(
+    public val title: TextStyle,
+    public val body: TextStyle,
+    /** The "1 / 5" step counter. */
+    public val counter: TextStyle,
+    public val skip: TextStyle,
+    public val next: TextStyle,
+) {
+    public fun copy(
+        title: TextStyle = this.title,
+        body: TextStyle = this.body,
+        counter: TextStyle = this.counter,
+        skip: TextStyle = this.skip,
+        next: TextStyle = this.next,
+    ): TourCardTextStyles = TourCardTextStyles(
+        title = title,
+        body = body,
+        counter = counter,
+        skip = skip,
+        next = next,
+    )
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is TourCardTextStyles) return false
+        return title == other.title &&
+            body == other.body &&
+            counter == other.counter &&
+            skip == other.skip &&
+            next == other.next
+    }
+
+    override fun hashCode(): Int {
+        var result = title.hashCode()
+        result = 31 * result + body.hashCode()
+        result = 31 * result + counter.hashCode()
+        result = 31 * result + skip.hashCode()
+        result = 31 * result + next.hashCode()
+        return result
+    }
+
+    override fun toString(): String =
+        "TourCardTextStyles(title=$title, body=$body, counter=$counter, skip=$skip, next=$next)"
+}
+
 /** Default values for [TourCard] and [TourCardText]. */
 public object TourCardDefaults {
+    /**
+     * Text styles taken from the current [MaterialTheme]'s typography, so the card uses the app's
+     * fonts and sizes. Pass any of them to change just that one.
+     */
+    @Composable
+    @ReadOnlyComposable
+    public fun textStyles(
+        title: TextStyle = MaterialTheme.typography.titleMedium,
+        body: TextStyle = MaterialTheme.typography.bodyMedium,
+        counter: TextStyle = MaterialTheme.typography.labelMedium,
+        skip: TextStyle = MaterialTheme.typography.labelLarge,
+        next: TextStyle = MaterialTheme.typography.labelLarge,
+    ): TourCardTextStyles = TourCardTextStyles(
+        title = title,
+        body = body,
+        counter = counter,
+        skip = skip,
+        next = next,
+    )
+
     /**
      * Colors taken from the current [MaterialTheme], so the card follows the app's theme, light or
      * dark. Pass any of them to change just that one.
@@ -251,6 +314,7 @@ public fun TourCard(
     modifier: Modifier = Modifier,
     labels: TourCardLabels = TourCardLabels(),
     colors: TourCardColors = TourCardDefaults.colors(),
+    textStyles: TourCardTextStyles = TourCardDefaults.textStyles(),
     stepGroups: List<Int> = listOf(stepCount),
     content: @Composable (step: Int) -> Unit,
 ) {
@@ -290,7 +354,7 @@ public fun TourCard(
             StepDots(step = step + 1, groupSizes = stepGroups, colors = colors)
             BasicText(
                 text = "${step + 1} / $stepCount",
-                style = TourText.Counter.copy(color = colors.counter),
+                style = textStyles.counter.copy(color = colors.counter),
             )
         }
         AnimatedContent(
@@ -318,9 +382,14 @@ public fun TourCard(
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
         ) {
             if (!isLast) {
-                SkipButton(text = labels.skip, color = colors.skip, onClick = onSkip)
+                SkipButton(text = labels.skip, style = textStyles.skip.copy(color = colors.skip), onClick = onSkip)
             }
-            NextButton(text = if (isLast) labels.finish else labels.next, colors = colors, onClick = onNext)
+            NextButton(
+                text = if (isLast) labels.finish else labels.next,
+                style = textStyles.next.copy(color = colors.nextText),
+                background = colors.nextBackground,
+                onClick = onNext,
+            )
         }
     }
 }
@@ -335,16 +404,17 @@ public fun TourCardText(
     message: String,
     modifier: Modifier = Modifier,
     colors: TourCardColors = TourCardDefaults.colors(),
+    textStyles: TourCardTextStyles = TourCardDefaults.textStyles(),
 ) {
     Column(modifier = modifier) {
         BasicText(
             text = title,
-            style = TourText.Title.copy(color = colors.title),
+            style = textStyles.title.copy(color = colors.title),
             modifier = Modifier.padding(top = 4.dp),
         )
         BasicText(
             text = remember(message) { message.withBoldMarks() },
-            style = TourText.Body.copy(color = colors.body),
+            style = textStyles.body.copy(color = colors.body),
             modifier = Modifier.padding(top = 6.dp),
         )
     }
@@ -464,7 +534,7 @@ private fun StepDots(
 }
 
 @Composable
-private fun SkipButton(text: String, color: Color, onClick: () -> Unit) {
+private fun SkipButton(text: String, style: TextStyle, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .heightIn(min = MinTouchTarget)
@@ -475,7 +545,7 @@ private fun SkipButton(text: String, color: Color, onClick: () -> Unit) {
     ) {
         BasicText(
             text = text,
-            style = TourText.Skip.copy(color = color),
+            style = style,
             maxLines = 1,
             softWrap = false,
         )
@@ -484,7 +554,7 @@ private fun SkipButton(text: String, color: Color, onClick: () -> Unit) {
 
 /** A pill about 36dp tall, with a full 48dp touch target around it. */
 @Composable
-private fun NextButton(text: String, colors: TourCardColors, onClick: () -> Unit) {
+private fun NextButton(text: String, style: TextStyle, background: Color, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .heightIn(min = MinTouchTarget)
@@ -498,12 +568,12 @@ private fun NextButton(text: String, colors: TourCardColors, onClick: () -> Unit
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(percent = 50))
-                .background(colors.nextBackground)
+                .background(background)
                 .padding(horizontal = 16.dp, vertical = 8.dp),
         ) {
             BasicText(
                 text = text,
-                style = TourText.Next.copy(color = colors.nextText),
+                style = style,
                 maxLines = 1,
                 softWrap = false,
             )
