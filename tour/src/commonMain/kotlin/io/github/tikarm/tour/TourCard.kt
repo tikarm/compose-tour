@@ -12,10 +12,12 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -49,6 +51,12 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -154,7 +162,12 @@ public class TourCardColors(
 }
 
 /**
- * Button texts of [TourCard]. [finish] replaces [next] on the last step.
+ * Texts of [TourCard]. [finish] replaces [next] on the last step. [previous] labels the Back button
+ * and the screen reader action that goes back a step.
+ *
+ * [stepProgress] is what screen readers say for the step dots and counter, like "Step 2 of 5";
+ * null says that in English. [TourCard] is called again for each step, so the text can be made
+ * there, for example from a translated string resource.
  *
  * Not a data class, so fields can be added later without breaking apps built against an older
  * version.
@@ -164,27 +177,44 @@ public class TourCardLabels(
     public val skip: String = "Skip",
     public val next: String = "Next",
     public val finish: String = "Finish",
+    public val previous: String = "Back",
+    public val stepProgress: String? = null,
 ) {
     public fun copy(
         skip: String = this.skip,
         next: String = this.next,
         finish: String = this.finish,
-    ): TourCardLabels = TourCardLabels(skip = skip, next = next, finish = finish)
+        previous: String = this.previous,
+        stepProgress: String? = this.stepProgress,
+    ): TourCardLabels = TourCardLabels(
+        skip = skip,
+        next = next,
+        finish = finish,
+        previous = previous,
+        stepProgress = stepProgress,
+    )
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is TourCardLabels) return false
-        return skip == other.skip && next == other.next && finish == other.finish
+        return skip == other.skip &&
+            next == other.next &&
+            finish == other.finish &&
+            previous == other.previous &&
+            stepProgress == other.stepProgress
     }
 
     override fun hashCode(): Int {
         var result = skip.hashCode()
         result = 31 * result + next.hashCode()
         result = 31 * result + finish.hashCode()
+        result = 31 * result + previous.hashCode()
+        result = 31 * result + (stepProgress?.hashCode() ?: 0)
         return result
     }
 
-    override fun toString(): String = "TourCardLabels(skip=$skip, next=$next, finish=$finish)"
+    override fun toString(): String =
+        "TourCardLabels(skip=$skip, next=$next, finish=$finish, previous=$previous, stepProgress=$stepProgress)"
 }
 
 /**
@@ -298,6 +328,8 @@ public object TourCardDefaults {
 /**
  * A ready made tip for [TourOverlay]: step dots and a counter on top, the step's [content] in the
  * middle, and Skip and Next buttons at the bottom. Swiping the card moves between steps.
+ * [showPreviousButton] adds a Back button from the second step on, for users who do not swipe,
+ * like desktop mouse users. Screen readers get a Back action on the card either way.
  *
  * [step] is 0-based, out of [stepCount]. [content] is shown for each step and slides like a pager
  * when the step changes; [TourCardText] fits it for a title and a message.
@@ -315,6 +347,7 @@ public fun TourCard(
     labels: TourCardLabels = TourCardLabels(),
     colors: TourCardColors = TourCardDefaults.colors(),
     textStyles: TourCardTextStyles = TourCardDefaults.textStyles(),
+    showPreviousButton: Boolean = false,
     stepGroups: List<Int> = listOf(stepCount),
     content: @Composable (step: Int) -> Unit,
 ) {
@@ -343,11 +376,27 @@ public fun TourCard(
             .shadow(24.dp, CardShape, ambientColor = colors.shadow)
             .clip(CardShape)
             .background(colors.card)
-            .padding(CardPadding),
+            .padding(CardPadding)
+            .semantics {
+                // Swiping back has no screen reader equivalent, so the card offers it as an action
+                if (step > 0) {
+                    customActions = listOf(
+                        CustomAccessibilityAction(labels.previous) {
+                            currentOnPrevious()
+                            true
+                        },
+                    )
+                }
+            },
     ) {
         // Progress on top: the dots get the full width, the buttons get the footer
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                // Read as one phrase instead of "1 slash 5" with unlabeled dots
+                .clearAndSetSemantics {
+                    contentDescription = labels.stepProgress ?: "Step ${step + 1} of $stepCount"
+                },
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -379,10 +428,22 @@ public fun TourCard(
                 .fillMaxWidth()
                 .padding(top = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
+            if (showPreviousButton && step > 0) {
+                TextOnlyButton(
+                    text = labels.previous,
+                    style = textStyles.skip.copy(color = colors.skip),
+                    onClick = onPrevious,
+                )
+            }
+            Spacer(modifier = Modifier.weight(1f))
             if (!isLast) {
-                SkipButton(text = labels.skip, style = textStyles.skip.copy(color = colors.skip), onClick = onSkip)
+                TextOnlyButton(
+                    text = labels.skip,
+                    style = textStyles.skip.copy(color = colors.skip),
+                    onClick = onSkip,
+                )
             }
             NextButton(
                 text = if (isLast) labels.finish else labels.next,
@@ -534,12 +595,12 @@ private fun StepDots(
 }
 
 @Composable
-private fun SkipButton(text: String, style: TextStyle, onClick: () -> Unit) {
+private fun TextOnlyButton(text: String, style: TextStyle, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .heightIn(min = MinTouchTarget)
             .clip(RoundedCornerShape(8.dp))
-            .clickable(onClick = onClick)
+            .clickable(role = Role.Button, onClick = onClick)
             .padding(horizontal = 8.dp),
         contentAlignment = Alignment.Center,
     ) {
@@ -555,12 +616,14 @@ private fun SkipButton(text: String, style: TextStyle, onClick: () -> Unit) {
 /** A pill about 36dp tall, with a full 48dp touch target around it. */
 @Composable
 private fun NextButton(text: String, style: TextStyle, background: Color, onClick: () -> Unit) {
+    val interactionSource = remember { MutableInteractionSource() }
     Box(
         modifier = Modifier
             .heightIn(min = MinTouchTarget)
             .clickable(
-                interactionSource = remember { MutableInteractionSource() },
+                interactionSource = interactionSource,
                 indication = null,
+                role = Role.Button,
                 onClick = onClick,
             ),
         contentAlignment = Alignment.Center,
@@ -569,6 +632,8 @@ private fun NextButton(text: String, style: TextStyle, background: Color, onClic
             modifier = Modifier
                 .clip(RoundedCornerShape(percent = 50))
                 .background(background)
+                // Press and keyboard focus show on the pill, not the larger touch area around it
+                .indication(interactionSource, LocalIndication.current)
                 .padding(horizontal = 16.dp, vertical = 8.dp),
         ) {
             BasicText(
