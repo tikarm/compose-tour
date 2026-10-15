@@ -14,7 +14,9 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -37,13 +39,16 @@ import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.findRootCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
@@ -67,7 +72,10 @@ public class TourOverlayDimensions(
     /** Keeps the cutout off the window edges, so a target at the edge does not get a clipped highlight. */
     public val cutoutEdgeMargin: Dp = 4.dp,
     public val ringWidth: Dp = 2.dp,
-    /** The tip stays at least this far from the overlay's edges. */
+    /**
+     * The tip stays at least this far from the overlay's edges, and from the system bars, display
+     * cutouts and keyboard where they cover the overlay.
+     */
     public val tipMargin: Dp = 16.dp,
     /** Space between the cutout and the tip. */
     public val tipGap: Dp = 12.dp,
@@ -190,12 +198,30 @@ private fun <K : Any> OverlayContent(
     // Targets are measured from the window root; the overlay may not start there
     var origin by remember { mutableStateOf(Offset.Zero) }
     var overlaySize by remember { mutableStateOf(IntSize.Zero) }
+    var rootSize by remember { mutableStateOf(IntSize.Zero) }
     var tipSize by remember { mutableStateOf(IntSize.Zero) }
     val density = LocalDensity.current
+    val layoutDirection = LocalLayoutDirection.current
+    val safeInsets = WindowInsets.safeDrawing
     val cutoutPadding = with(density) { dimensions.cutoutPadding.toPx() }
     val edgeMargin = with(density) { dimensions.cutoutEdgeMargin.toPx() }
     val tipMargin = with(density) { dimensions.tipMargin.roundToPx() }
     val tipGap = with(density) { dimensions.tipGap.roundToPx() }
+
+    // Where the tip may go in an overlay of [size]: inside the margins and clear of system bars,
+    // notches and the keyboard. Insets are measured from the window's edges, so only the part
+    // that reaches into the overlay counts.
+    fun tipArea(size: IntSize): IntRect {
+        val leftGap = origin.x.roundToInt()
+        val topGap = origin.y.roundToInt()
+        val rightGap = (rootSize.width - leftGap - size.width).coerceAtLeast(0)
+        val bottomGap = (rootSize.height - topGap - size.height).coerceAtLeast(0)
+        val left = (safeInsets.getLeft(density, layoutDirection) - leftGap).coerceAtLeast(0) + tipMargin
+        val top = (safeInsets.getTop(density) - topGap).coerceAtLeast(0) + tipMargin
+        val right = size.width - (safeInsets.getRight(density, layoutDirection) - rightGap).coerceAtLeast(0) - tipMargin
+        val bottom = size.height - (safeInsets.getBottom(density) - bottomGap).coerceAtLeast(0) - tipMargin
+        return IntRect(left, top, right.coerceAtLeast(left), bottom.coerceAtLeast(top))
+    }
 
     // Read inside the glides only, so moving targets redraw and relayout without recomposing
     fun targetCutout(): Rect? = targets.boundsOf(target)
@@ -209,7 +235,7 @@ private fun <K : Any> OverlayContent(
     // Placed from where the cutout is going, not where it is mid glide, so the tip picks its side
     // (below or above) once per target and glides there instead of jumping sides on the way
     val tipPosition = rememberGlidingValue(key = target, converter = IntOffset.VectorConverter) {
-        tipPosition(targetCutout(), tipSize, overlaySize, tipMargin, tipGap)
+        tipPosition(targetCutout(), tipSize, tipArea(overlaySize), tipGap)
     }
     val scrim = remember { Path() }
 
@@ -219,6 +245,7 @@ private fun <K : Any> OverlayContent(
             .onGloballyPositioned {
                 origin = it.positionInRoot()
                 overlaySize = it.size
+                rootSize = it.findRootCoordinates().size
             }
             .pointerInput(Unit) {
                 awaitPointerEventScope {
@@ -249,7 +276,7 @@ private fun <K : Any> OverlayContent(
             }
         }
 
-        TipPlacement(position = { tipPosition.value ?: IntOffset.Zero }, margin = dimensions.tipMargin) {
+        TipPlacement(area = ::tipArea, position = { tipPosition.value ?: IntOffset.Zero }) {
             Box(modifier = tipModifier.onSizeChanged { tipSize = it }) {
                 tip(target)
             }
@@ -336,28 +363,31 @@ private fun Rect.keptInside(size: IntSize, margin: Float): Rect {
 }
 
 /**
- * Where the tip goes for [cutout]: below it, above it when there is no room, or centered without
- * one. Horizontally it is centered on the cutout, kept within the margins.
+ * Where the tip goes for [cutout]: below it, above it when there is no room, or centered in [area]
+ * without one. Horizontally it is centered on the cutout. It stays within [area] where it fits.
  */
-private fun tipPosition(cutout: Rect?, tip: IntSize, area: IntSize, margin: Int, gap: Int): IntOffset {
-    val centeredX = cutout?.center?.x?.roundToInt()?.minus(tip.width / 2) ?: ((area.width - tip.width) / 2)
-    val x = centeredX.coerceIn(margin, (area.width - margin - tip.width).coerceAtLeast(margin))
+private fun tipPosition(cutout: Rect?, tip: IntSize, area: IntRect, gap: Int): IntOffset {
+    val centeredX = cutout?.center?.x?.roundToInt()?.minus(tip.width / 2) ?: (area.center.x - tip.width / 2)
+    val x = centeredX.coerceIn(area.left, (area.right - tip.width).coerceAtLeast(area.left))
     val y = when {
-        cutout == null -> (area.height - tip.height) / 2
-        cutout.bottom + gap + tip.height <= area.height - margin -> (cutout.bottom + gap).roundToInt()
-        else -> (cutout.top - gap - tip.height).roundToInt().coerceAtLeast(margin)
+        cutout == null -> (area.center.y - tip.height / 2).coerceAtLeast(area.top)
+        cutout.bottom + gap + tip.height <= area.bottom -> (cutout.bottom + gap).roundToInt().coerceAtLeast(area.top)
+        else -> (cutout.top - gap - tip.height).roundToInt().coerceAtLeast(area.top)
     }
     return IntOffset(x, y)
 }
 
-/** Measures the tip within the side margins and places it at [position], read while placing. */
+/**
+ * Measures the tip to fit the width of [area], which gets the overlay's size, and places it at
+ * [position]. Both are read while measuring and placing, so changes skip composition.
+ */
 @Composable
-private fun TipPlacement(position: () -> IntOffset, margin: Dp, content: @Composable () -> Unit) {
+private fun TipPlacement(area: (IntSize) -> IntRect, position: () -> IntOffset, content: @Composable () -> Unit) {
     Layout(content = content, modifier = Modifier.fillMaxSize()) { measurables, constraints ->
         require(constraints.hasBoundedWidth && constraints.hasBoundedHeight) {
             "TourOverlay needs a bounded size; place it in a layout that gives it one"
         }
-        val maxTipWidth = (constraints.maxWidth - 2 * margin.roundToPx()).coerceAtLeast(0)
+        val maxTipWidth = area(IntSize(constraints.maxWidth, constraints.maxHeight)).width
         val tip = measurables.first().measure(Constraints(maxWidth = maxTipWidth))
         layout(constraints.maxWidth, constraints.maxHeight) {
             tip.place(position())
