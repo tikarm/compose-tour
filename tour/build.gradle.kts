@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.jetbrains.compose)
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.maven.publish)
+    alias(libs.plugins.binary.compatibility.validator)
 }
 
 kotlin {
@@ -29,6 +30,14 @@ kotlin {
             implementation(compose.material3)
             implementation(libs.compose.ui.backhandler)
         }
+    }
+}
+
+apiValidation {
+    // Also checks the iOS API, not only the JVM one
+    @OptIn(kotlinx.validation.ExperimentalBCVApi::class)
+    klib {
+        enabled = true
     }
 }
 
