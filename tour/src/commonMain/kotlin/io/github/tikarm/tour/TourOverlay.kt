@@ -13,6 +13,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,6 +32,8 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.backhandler.BackHandler
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -159,7 +162,6 @@ public object TourOverlayDefaults {
  * Screen readers announce the tip when it appears or changes. The overlay cannot hide the elements
  * under it from screen readers; [TourHost] does that for the screen it wraps.
  */
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 public fun <K : Any> TourOverlay(
     target: K?,
@@ -169,6 +171,33 @@ public fun <K : Any> TourOverlay(
     ringColor: Color? = null,
     dimensions: TourOverlayDimensions = TourOverlayDefaults.Dimensions,
     onDismissRequest: (() -> Unit)? = null,
+    tip: @Composable (K) -> Unit,
+) {
+    TourOverlay(
+        target = target,
+        targets = targets,
+        modifier = modifier,
+        scrimColor = scrimColor,
+        ringColor = ringColor,
+        dimensions = dimensions,
+        onDismissRequest = onDismissRequest,
+        tipFocusRequester = null,
+        tip = tip,
+    )
+}
+
+/** [TourOverlay] with [tipFocusRequester] attached to the tip, so [TourHost] can move focus there. */
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+internal fun <K : Any> TourOverlay(
+    target: K?,
+    targets: TourTargets<K>,
+    modifier: Modifier,
+    scrimColor: Color,
+    ringColor: Color?,
+    dimensions: TourOverlayDimensions,
+    onDismissRequest: (() -> Unit)?,
+    tipFocusRequester: FocusRequester?,
     tip: @Composable (K) -> Unit,
 ) {
     // Keeps the last target while the overlay fades out after the tour ends
@@ -195,10 +224,14 @@ public fun <K : Any> TourOverlay(
             ringColor = ringColor,
             dimensions = dimensions,
             // The tip grows in as the overlay opens; changing steps is up to the tip itself
-            tipModifier = Modifier.animateEnterExit(
-                enter = scaleIn(tween(TipEnterMillis), initialScale = TipInitialScale),
-                exit = ExitTransition.None,
-            ),
+            tipModifier = Modifier
+                .animateEnterExit(
+                    enter = scaleIn(tween(TipEnterMillis), initialScale = TipInitialScale),
+                    exit = ExitTransition.None,
+                )
+                .then(if (tipFocusRequester != null) Modifier.focusRequester(tipFocusRequester) else Modifier)
+                // Focusing the tip focuses its first focusable element, like a button
+                .focusGroup(),
             tip = tip,
         )
     }
