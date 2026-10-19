@@ -1,0 +1,30 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    # macOS, as the iOS targets only build there
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v5
+
+      # apiCheck (part of check) fails if the public API changed without running apiDump
+      - name: Build the library and samples
+        run: >
+          ./gradlew
+          :tour:check
+          :tour:assemble
+          :sample:shared:compileKotlinJvm
+          :sample:shared:compileKotlinIosSimulatorArm64
+          :sample:android:assembleDebug

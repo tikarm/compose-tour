@@ -5,6 +5,7 @@ compose-plugin = "1.9.3"
 maven-publish = "0.37.0"
 coroutines = "1.10.2"
 activity-compose = "1.11.0"
+binary-compatibility-validator = "0.18.1"
 
 [libraries]
 kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "coroutines" }
@@ -18,3 +19,4 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 jetbrains-compose = { id = "org.jetbrains.compose", version.ref = "compose-plugin" }
 android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "maven-publish" }
+binary-compatibility-validator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "binary-compatibility-validator" }

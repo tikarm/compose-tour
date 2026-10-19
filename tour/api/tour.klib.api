@@ -1,0 +1,141 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, iosX64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <compose-tour:tour>
+final class <#A: kotlin/Any> io.github.tikarm.tour/TourTargets { // io.github.tikarm.tour/TourTargets|null[0]
+    constructor <init>() // io.github.tikarm.tour/TourTargets.<init>|<init>(){}[0]
+
+    final fun boundsOf(#A): androidx.compose.ui.geometry/Rect? // io.github.tikarm.tour/TourTargets.boundsOf|boundsOf(1:0){}[0]
+}
+
+final class io.github.tikarm.tour/TourCardColors { // io.github.tikarm.tour/TourCardColors|null[0]
+    constructor <init>(androidx.compose.ui.graphics/Color, androidx.compose.ui.graphics/Color, androidx.compose.ui.graphics/Color, androidx.compose.ui.graphics/Color, androidx.compose.ui.graphics/Color, androidx.compose.ui.graphics/Color, androidx.compose.ui.graphics/Color, androidx.compose.ui.graphics/Color, androidx.compose.ui.graphics/Color, androidx.compose.ui.graphics/Color, androidx.compose.ui.graphics/Color) // io.github.tikarm.tour/TourCardColors.<init>|<init>(androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color){}[0]
+
+    final val body // io.github.tikarm.tour/TourCardColors.body|{}body[0]
+        final fun <get-body>(): androidx.compose.ui.graphics/Color // io.github.tikarm.tour/TourCardColors.body.<get-body>|<get-body>(){}[0]
+    final val card // io.github.tikarm.tour/TourCardColors.card|{}card[0]
+        final fun <get-card>(): androidx.compose.ui.graphics/Color // io.github.tikarm.tour/TourCardColors.card.<get-card>|<get-card>(){}[0]
+    final val counter // io.github.tikarm.tour/TourCardColors.counter|{}counter[0]
+        final fun <get-counter>(): androidx.compose.ui.graphics/Color // io.github.tikarm.tour/TourCardColors.counter.<get-counter>|<get-counter>(){}[0]
+    final val dotActive // io.github.tikarm.tour/TourCardColors.dotActive|{}dotActive[0]
+        final fun <get-dotActive>(): androidx.compose.ui.graphics/Color // io.github.tikarm.tour/TourCardColors.dotActive.<get-dotActive>|<get-dotActive>(){}[0]
+    final val dotDone // io.github.tikarm.tour/TourCardColors.dotDone|{}dotDone[0]
+        final fun <get-dotDone>(): androidx.compose.ui.graphics/Color // io.github.tikarm.tour/TourCardColors.dotDone.<get-dotDone>|<get-dotDone>(){}[0]
+    final val dotIdle // io.github.tikarm.tour/TourCardColors.dotIdle|{}dotIdle[0]
+        final fun <get-dotIdle>(): androidx.compose.ui.graphics/Color // io.github.tikarm.tour/TourCardColors.dotIdle.<get-dotIdle>|<get-dotIdle>(){}[0]
+    final val nextBackground // io.github.tikarm.tour/TourCardColors.nextBackground|{}nextBackground[0]
+        final fun <get-nextBackground>(): androidx.compose.ui.graphics/Color // io.github.tikarm.tour/TourCardColors.nextBackground.<get-nextBackground>|<get-nextBackground>(){}[0]
+    final val nextText // io.github.tikarm.tour/TourCardColors.nextText|{}nextText[0]
+        final fun <get-nextText>(): androidx.compose.ui.graphics/Color // io.github.tikarm.tour/TourCardColors.nextText.<get-nextText>|<get-nextText>(){}[0]
+    final val shadow // io.github.tikarm.tour/TourCardColors.shadow|{}shadow[0]
+        final fun <get-shadow>(): androidx.compose.ui.graphics/Color // io.github.tikarm.tour/TourCardColors.shadow.<get-shadow>|<get-shadow>(){}[0]
+    final val skip // io.github.tikarm.tour/TourCardColors.skip|{}skip[0]
+        final fun <get-skip>(): androidx.compose.ui.graphics/Color // io.github.tikarm.tour/TourCardColors.skip.<get-skip>|<get-skip>(){}[0]
+    final val title // io.github.tikarm.tour/TourCardColors.title|{}title[0]
+        final fun <get-title>(): androidx.compose.ui.graphics/Color // io.github.tikarm.tour/TourCardColors.title.<get-title>|<get-title>(){}[0]
+
+    final fun copy(androidx.compose.ui.graphics/Color = ..., androidx.compose.ui.graphics/Color = ..., androidx.compose.ui.graphics/Color = ..., androidx.compose.ui.graphics/Color = ..., androidx.compose.ui.graphics/Color = ..., androidx.compose.ui.graphics/Color = ..., androidx.compose.ui.graphics/Color = ..., androidx.compose.ui.graphics/Color = ..., androidx.compose.ui.graphics/Color = ..., androidx.compose.ui.graphics/Color = ..., androidx.compose.ui.graphics/Color = ...): io.github.tikarm.tour/TourCardColors // io.github.tikarm.tour/TourCardColors.copy|copy(androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.tikarm.tour/TourCardColors.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.tikarm.tour/TourCardColors.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.tikarm.tour/TourCardColors.toString|toString(){}[0]
+}
+
+final class io.github.tikarm.tour/TourCardLabels { // io.github.tikarm.tour/TourCardLabels|null[0]
+    constructor <init>(kotlin/String = ..., kotlin/String = ..., kotlin/String = ..., kotlin/String = ..., kotlin/String? = ...) // io.github.tikarm.tour/TourCardLabels.<init>|<init>(kotlin.String;kotlin.String;kotlin.String;kotlin.String;kotlin.String?){}[0]
+
+    final val finish // io.github.tikarm.tour/TourCardLabels.finish|{}finish[0]
+        final fun <get-finish>(): kotlin/String // io.github.tikarm.tour/TourCardLabels.finish.<get-finish>|<get-finish>(){}[0]
+    final val next // io.github.tikarm.tour/TourCardLabels.next|{}next[0]
+        final fun <get-next>(): kotlin/String // io.github.tikarm.tour/TourCardLabels.next.<get-next>|<get-next>(){}[0]
+    final val previous // io.github.tikarm.tour/TourCardLabels.previous|{}previous[0]
+        final fun <get-previous>(): kotlin/String // io.github.tikarm.tour/TourCardLabels.previous.<get-previous>|<get-previous>(){}[0]
+    final val skip // io.github.tikarm.tour/TourCardLabels.skip|{}skip[0]
+        final fun <get-skip>(): kotlin/String // io.github.tikarm.tour/TourCardLabels.skip.<get-skip>|<get-skip>(){}[0]
+    final val stepProgress // io.github.tikarm.tour/TourCardLabels.stepProgress|{}stepProgress[0]
+        final fun <get-stepProgress>(): kotlin/String? // io.github.tikarm.tour/TourCardLabels.stepProgress.<get-stepProgress>|<get-stepProgress>(){}[0]
+
+    final fun copy(kotlin/String = ..., kotlin/String = ..., kotlin/String = ..., kotlin/String = ..., kotlin/String? = ...): io.github.tikarm.tour/TourCardLabels // io.github.tikarm.tour/TourCardLabels.copy|copy(kotlin.String;kotlin.String;kotlin.String;kotlin.String;kotlin.String?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.tikarm.tour/TourCardLabels.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.tikarm.tour/TourCardLabels.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.tikarm.tour/TourCardLabels.toString|toString(){}[0]
+}
+
+final class io.github.tikarm.tour/TourCardTextStyles { // io.github.tikarm.tour/TourCardTextStyles|null[0]
+    constructor <init>(androidx.compose.ui.text/TextStyle, androidx.compose.ui.text/TextStyle, androidx.compose.ui.text/TextStyle, androidx.compose.ui.text/TextStyle, androidx.compose.ui.text/TextStyle) // io.github.tikarm.tour/TourCardTextStyles.<init>|<init>(androidx.compose.ui.text.TextStyle;androidx.compose.ui.text.TextStyle;androidx.compose.ui.text.TextStyle;androidx.compose.ui.text.TextStyle;androidx.compose.ui.text.TextStyle){}[0]
+
+    final val body // io.github.tikarm.tour/TourCardTextStyles.body|{}body[0]
+        final fun <get-body>(): androidx.compose.ui.text/TextStyle // io.github.tikarm.tour/TourCardTextStyles.body.<get-body>|<get-body>(){}[0]
+    final val counter // io.github.tikarm.tour/TourCardTextStyles.counter|{}counter[0]
+        final fun <get-counter>(): androidx.compose.ui.text/TextStyle // io.github.tikarm.tour/TourCardTextStyles.counter.<get-counter>|<get-counter>(){}[0]
+    final val next // io.github.tikarm.tour/TourCardTextStyles.next|{}next[0]
+        final fun <get-next>(): androidx.compose.ui.text/TextStyle // io.github.tikarm.tour/TourCardTextStyles.next.<get-next>|<get-next>(){}[0]
+    final val skip // io.github.tikarm.tour/TourCardTextStyles.skip|{}skip[0]
+        final fun <get-skip>(): androidx.compose.ui.text/TextStyle // io.github.tikarm.tour/TourCardTextStyles.skip.<get-skip>|<get-skip>(){}[0]
+    final val title // io.github.tikarm.tour/TourCardTextStyles.title|{}title[0]
+        final fun <get-title>(): androidx.compose.ui.text/TextStyle // io.github.tikarm.tour/TourCardTextStyles.title.<get-title>|<get-title>(){}[0]
+
+    final fun copy(androidx.compose.ui.text/TextStyle = ..., androidx.compose.ui.text/TextStyle = ..., androidx.compose.ui.text/TextStyle = ..., androidx.compose.ui.text/TextStyle = ..., androidx.compose.ui.text/TextStyle = ...): io.github.tikarm.tour/TourCardTextStyles // io.github.tikarm.tour/TourCardTextStyles.copy|copy(androidx.compose.ui.text.TextStyle;androidx.compose.ui.text.TextStyle;androidx.compose.ui.text.TextStyle;androidx.compose.ui.text.TextStyle;androidx.compose.ui.text.TextStyle){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.tikarm.tour/TourCardTextStyles.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.tikarm.tour/TourCardTextStyles.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.tikarm.tour/TourCardTextStyles.toString|toString(){}[0]
+}
+
+final class io.github.tikarm.tour/TourOverlayDimensions { // io.github.tikarm.tour/TourOverlayDimensions|null[0]
+    constructor <init>(androidx.compose.ui.unit/Dp = ..., androidx.compose.ui.unit/Dp = ..., androidx.compose.ui.unit/Dp = ..., androidx.compose.ui.unit/Dp = ..., androidx.compose.ui.unit/Dp = ..., androidx.compose.ui.unit/Dp = ...) // io.github.tikarm.tour/TourOverlayDimensions.<init>|<init>(androidx.compose.ui.unit.Dp;androidx.compose.ui.unit.Dp;androidx.compose.ui.unit.Dp;androidx.compose.ui.unit.Dp;androidx.compose.ui.unit.Dp;androidx.compose.ui.unit.Dp){}[0]
+
+    final val cutoutEdgeMargin // io.github.tikarm.tour/TourOverlayDimensions.cutoutEdgeMargin|{}cutoutEdgeMargin[0]
+        final fun <get-cutoutEdgeMargin>(): androidx.compose.ui.unit/Dp // io.github.tikarm.tour/TourOverlayDimensions.cutoutEdgeMargin.<get-cutoutEdgeMargin>|<get-cutoutEdgeMargin>(){}[0]
+    final val cutoutPadding // io.github.tikarm.tour/TourOverlayDimensions.cutoutPadding|{}cutoutPadding[0]
+        final fun <get-cutoutPadding>(): androidx.compose.ui.unit/Dp // io.github.tikarm.tour/TourOverlayDimensions.cutoutPadding.<get-cutoutPadding>|<get-cutoutPadding>(){}[0]
+    final val cutoutRadius // io.github.tikarm.tour/TourOverlayDimensions.cutoutRadius|{}cutoutRadius[0]
+        final fun <get-cutoutRadius>(): androidx.compose.ui.unit/Dp // io.github.tikarm.tour/TourOverlayDimensions.cutoutRadius.<get-cutoutRadius>|<get-cutoutRadius>(){}[0]
+    final val ringWidth // io.github.tikarm.tour/TourOverlayDimensions.ringWidth|{}ringWidth[0]
+        final fun <get-ringWidth>(): androidx.compose.ui.unit/Dp // io.github.tikarm.tour/TourOverlayDimensions.ringWidth.<get-ringWidth>|<get-ringWidth>(){}[0]
+    final val tipGap // io.github.tikarm.tour/TourOverlayDimensions.tipGap|{}tipGap[0]
+        final fun <get-tipGap>(): androidx.compose.ui.unit/Dp // io.github.tikarm.tour/TourOverlayDimensions.tipGap.<get-tipGap>|<get-tipGap>(){}[0]
+    final val tipMargin // io.github.tikarm.tour/TourOverlayDimensions.tipMargin|{}tipMargin[0]
+        final fun <get-tipMargin>(): androidx.compose.ui.unit/Dp // io.github.tikarm.tour/TourOverlayDimensions.tipMargin.<get-tipMargin>|<get-tipMargin>(){}[0]
+
+    final fun copy(androidx.compose.ui.unit/Dp = ..., androidx.compose.ui.unit/Dp = ..., androidx.compose.ui.unit/Dp = ..., androidx.compose.ui.unit/Dp = ..., androidx.compose.ui.unit/Dp = ..., androidx.compose.ui.unit/Dp = ...): io.github.tikarm.tour/TourOverlayDimensions // io.github.tikarm.tour/TourOverlayDimensions.copy|copy(androidx.compose.ui.unit.Dp;androidx.compose.ui.unit.Dp;androidx.compose.ui.unit.Dp;androidx.compose.ui.unit.Dp;androidx.compose.ui.unit.Dp;androidx.compose.ui.unit.Dp){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.tikarm.tour/TourOverlayDimensions.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.tikarm.tour/TourOverlayDimensions.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.tikarm.tour/TourOverlayDimensions.toString|toString(){}[0]
+}
+
+final object io.github.tikarm.tour/TourCardDefaults { // io.github.tikarm.tour/TourCardDefaults|null[0]
+    final fun colors(androidx.compose.ui.graphics/Color, androidx.compose.ui.graphics/Color, androidx.compose.ui.graphics/Color, androidx.compose.ui.graphics/Color, androidx.compose.ui.graphics/Color, androidx.compose.ui.graphics/Color, androidx.compose.ui.graphics/Color, androidx.compose.ui.graphics/Color, androidx.compose.ui.graphics/Color, androidx.compose.ui.graphics/Color, androidx.compose.ui.graphics/Color, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int, kotlin/Int): io.github.tikarm.tour/TourCardColors // io.github.tikarm.tour/TourCardDefaults.colors|colors(androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int;kotlin.Int){}[0]
+    final fun textStyles(androidx.compose.ui.text/TextStyle?, androidx.compose.ui.text/TextStyle?, androidx.compose.ui.text/TextStyle?, androidx.compose.ui.text/TextStyle?, androidx.compose.ui.text/TextStyle?, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int): io.github.tikarm.tour/TourCardTextStyles // io.github.tikarm.tour/TourCardDefaults.textStyles|textStyles(androidx.compose.ui.text.TextStyle?;androidx.compose.ui.text.TextStyle?;androidx.compose.ui.text.TextStyle?;androidx.compose.ui.text.TextStyle?;androidx.compose.ui.text.TextStyle?;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int){}[0]
+}
+
+final object io.github.tikarm.tour/TourOverlayDefaults { // io.github.tikarm.tour/TourOverlayDefaults|null[0]
+    final val Dimensions // io.github.tikarm.tour/TourOverlayDefaults.Dimensions|{}Dimensions[0]
+        final fun <get-Dimensions>(): io.github.tikarm.tour/TourOverlayDimensions // io.github.tikarm.tour/TourOverlayDefaults.Dimensions.<get-Dimensions>|<get-Dimensions>(){}[0]
+    final val ScrimColor // io.github.tikarm.tour/TourOverlayDefaults.ScrimColor|{}ScrimColor[0]
+        final fun <get-ScrimColor>(androidx.compose.runtime/Composer?, kotlin/Int): androidx.compose.ui.graphics/Color // io.github.tikarm.tour/TourOverlayDefaults.ScrimColor.<get-ScrimColor>|<get-ScrimColor>(androidx.compose.runtime.Composer?;kotlin.Int){}[0]
+}
+
+final val io.github.tikarm.tour/io_github_tikarm_tour_TourCardColors$stableprop // io.github.tikarm.tour/io_github_tikarm_tour_TourCardColors$stableprop|#static{}io_github_tikarm_tour_TourCardColors$stableprop[0]
+final val io.github.tikarm.tour/io_github_tikarm_tour_TourCardDefaults$stableprop // io.github.tikarm.tour/io_github_tikarm_tour_TourCardDefaults$stableprop|#static{}io_github_tikarm_tour_TourCardDefaults$stableprop[0]
+final val io.github.tikarm.tour/io_github_tikarm_tour_TourCardLabels$stableprop // io.github.tikarm.tour/io_github_tikarm_tour_TourCardLabels$stableprop|#static{}io_github_tikarm_tour_TourCardLabels$stableprop[0]
+final val io.github.tikarm.tour/io_github_tikarm_tour_TourCardTextStyles$stableprop // io.github.tikarm.tour/io_github_tikarm_tour_TourCardTextStyles$stableprop|#static{}io_github_tikarm_tour_TourCardTextStyles$stableprop[0]
+final val io.github.tikarm.tour/io_github_tikarm_tour_TourOverlayDefaults$stableprop // io.github.tikarm.tour/io_github_tikarm_tour_TourOverlayDefaults$stableprop|#static{}io_github_tikarm_tour_TourOverlayDefaults$stableprop[0]
+final val io.github.tikarm.tour/io_github_tikarm_tour_TourOverlayDimensions$stableprop // io.github.tikarm.tour/io_github_tikarm_tour_TourOverlayDimensions$stableprop|#static{}io_github_tikarm_tour_TourOverlayDimensions$stableprop[0]
+final val io.github.tikarm.tour/io_github_tikarm_tour_TourTargets$stableprop // io.github.tikarm.tour/io_github_tikarm_tour_TourTargets$stableprop|#static{}io_github_tikarm_tour_TourTargets$stableprop[0]
+
+final fun <#A: kotlin/Any> (androidx.compose.ui/Modifier).io.github.tikarm.tour/tourTarget(#A, io.github.tikarm.tour/TourTargets<#A>): androidx.compose.ui/Modifier // io.github.tikarm.tour/tourTarget|tourTarget@androidx.compose.ui.Modifier(0:0;io.github.tikarm.tour.TourTargets<0:0>){0§<kotlin.Any>}[0]
+final fun <#A: kotlin/Any> io.github.tikarm.tour/TourHost(#A?, io.github.tikarm.tour/TourTargets<#A>, kotlin/Function3<#A, androidx.compose.runtime/Composer, kotlin/Int, kotlin/Unit>, androidx.compose.ui/Modifier?, androidx.compose.ui.graphics/Color, androidx.compose.ui.graphics/Color?, io.github.tikarm.tour/TourOverlayDimensions?, kotlin/Function0<kotlin/Unit>?, kotlin/Function2<androidx.compose.runtime/Composer, kotlin/Int, kotlin/Unit>, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int) // io.github.tikarm.tour/TourHost|TourHost(0:0?;io.github.tikarm.tour.TourTargets<0:0>;kotlin.Function3<0:0,androidx.compose.runtime.Composer,kotlin.Int,kotlin.Unit>;androidx.compose.ui.Modifier?;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color?;io.github.tikarm.tour.TourOverlayDimensions?;kotlin.Function0<kotlin.Unit>?;kotlin.Function2<androidx.compose.runtime.Composer,kotlin.Int,kotlin.Unit>;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int){0§<kotlin.Any>}[0]
+final fun <#A: kotlin/Any> io.github.tikarm.tour/TourOverlay(#A?, io.github.tikarm.tour/TourTargets<#A>, androidx.compose.ui/Modifier?, androidx.compose.ui.graphics/Color, androidx.compose.ui.graphics/Color?, io.github.tikarm.tour/TourOverlayDimensions?, kotlin/Function0<kotlin/Unit>?, kotlin/Function3<#A, androidx.compose.runtime/Composer, kotlin/Int, kotlin/Unit>, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int) // io.github.tikarm.tour/TourOverlay|TourOverlay(0:0?;io.github.tikarm.tour.TourTargets<0:0>;androidx.compose.ui.Modifier?;androidx.compose.ui.graphics.Color;androidx.compose.ui.graphics.Color?;io.github.tikarm.tour.TourOverlayDimensions?;kotlin.Function0<kotlin.Unit>?;kotlin.Function3<0:0,androidx.compose.runtime.Composer,kotlin.Int,kotlin.Unit>;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int){0§<kotlin.Any>}[0]
+final fun <#A: kotlin/Any> io.github.tikarm.tour/rememberTourTargets(androidx.compose.runtime/Composer?, kotlin/Int): io.github.tikarm.tour/TourTargets<#A> // io.github.tikarm.tour/rememberTourTargets|rememberTourTargets(androidx.compose.runtime.Composer?;kotlin.Int){0§<kotlin.Any>}[0]
+final fun io.github.tikarm.tour/TourCard(kotlin/Int, kotlin/Int, kotlin/Function0<kotlin/Unit>, kotlin/Function0<kotlin/Unit>, kotlin/Function0<kotlin/Unit>, androidx.compose.ui/Modifier?, io.github.tikarm.tour/TourCardLabels?, io.github.tikarm.tour/TourCardColors?, io.github.tikarm.tour/TourCardTextStyles?, kotlin/Boolean, kotlin.collections/List<kotlin/Int>?, kotlin/Function3<kotlin/Int, androidx.compose.runtime/Composer, kotlin/Int, kotlin/Unit>, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int, kotlin/Int) // io.github.tikarm.tour/TourCard|TourCard(kotlin.Int;kotlin.Int;kotlin.Function0<kotlin.Unit>;kotlin.Function0<kotlin.Unit>;kotlin.Function0<kotlin.Unit>;androidx.compose.ui.Modifier?;io.github.tikarm.tour.TourCardLabels?;io.github.tikarm.tour.TourCardColors?;io.github.tikarm.tour.TourCardTextStyles?;kotlin.Boolean;kotlin.collections.List<kotlin.Int>?;kotlin.Function3<kotlin.Int,androidx.compose.runtime.Composer,kotlin.Int,kotlin.Unit>;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int;kotlin.Int){}[0]
+final fun io.github.tikarm.tour/TourCardText(kotlin/String, kotlin/String, androidx.compose.ui/Modifier?, io.github.tikarm.tour/TourCardColors?, io.github.tikarm.tour/TourCardTextStyles?, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int) // io.github.tikarm.tour/TourCardText|TourCardText(kotlin.String;kotlin.String;androidx.compose.ui.Modifier?;io.github.tikarm.tour.TourCardColors?;io.github.tikarm.tour.TourCardTextStyles?;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int){}[0]
+final fun io.github.tikarm.tour/io_github_tikarm_tour_TourCardColors$stableprop_getter(): kotlin/Int // io.github.tikarm.tour/io_github_tikarm_tour_TourCardColors$stableprop_getter|io_github_tikarm_tour_TourCardColors$stableprop_getter(){}[0]
+final fun io.github.tikarm.tour/io_github_tikarm_tour_TourCardDefaults$stableprop_getter(): kotlin/Int // io.github.tikarm.tour/io_github_tikarm_tour_TourCardDefaults$stableprop_getter|io_github_tikarm_tour_TourCardDefaults$stableprop_getter(){}[0]
+final fun io.github.tikarm.tour/io_github_tikarm_tour_TourCardLabels$stableprop_getter(): kotlin/Int // io.github.tikarm.tour/io_github_tikarm_tour_TourCardLabels$stableprop_getter|io_github_tikarm_tour_TourCardLabels$stableprop_getter(){}[0]
+final fun io.github.tikarm.tour/io_github_tikarm_tour_TourCardTextStyles$stableprop_getter(): kotlin/Int // io.github.tikarm.tour/io_github_tikarm_tour_TourCardTextStyles$stableprop_getter|io_github_tikarm_tour_TourCardTextStyles$stableprop_getter(){}[0]
+final fun io.github.tikarm.tour/io_github_tikarm_tour_TourOverlayDefaults$stableprop_getter(): kotlin/Int // io.github.tikarm.tour/io_github_tikarm_tour_TourOverlayDefaults$stableprop_getter|io_github_tikarm_tour_TourOverlayDefaults$stableprop_getter(){}[0]
+final fun io.github.tikarm.tour/io_github_tikarm_tour_TourOverlayDimensions$stableprop_getter(): kotlin/Int // io.github.tikarm.tour/io_github_tikarm_tour_TourOverlayDimensions$stableprop_getter|io_github_tikarm_tour_TourOverlayDimensions$stableprop_getter(){}[0]
+final fun io.github.tikarm.tour/io_github_tikarm_tour_TourTargets$stableprop_getter(): kotlin/Int // io.github.tikarm.tour/io_github_tikarm_tour_TourTargets$stableprop_getter|io_github_tikarm_tour_TourTargets$stableprop_getter(){}[0]
