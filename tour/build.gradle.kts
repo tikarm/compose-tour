@@ -28,7 +28,7 @@ kotlin {
             implementation(compose.foundation)
             implementation(compose.animation)
             implementation(compose.material3)
-            implementation(libs.compose.ui.backhandler)
+            implementation(libs.navigationevent.compose)
         }
     }
 }
