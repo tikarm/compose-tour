@@ -22,6 +22,8 @@ kotlin {
 }
 ```
 
+It needs Compose Multiplatform 1.10 or newer.
+
 To try it before the release, run `./gradlew :tour:publishToMavenLocal` in this repository, add
 `mavenLocal()` to your project's repositories, and use version `0.1.0-SNAPSHOT`.
 
@@ -69,7 +71,8 @@ TourHost(
 - The overlay blocks all touches underneath, including on the highlighted element, so tips should
   not ask users to tap it.
 - Pass `onDismissRequest = { step = null }` to end the tour on the system back action (Esc on
-  desktop). Without it, back handling is up to the app.
+  desktop). Without it, back handling is up to the app. On Android this needs `androidx.activity`
+  1.12 or newer; with an older one, back is left to the app.
 - While the tour is shown, `TourHost` keeps screen readers and keyboard focus on the tip, the same
   way the overlay keeps touches there. `TourCard` has an optional Back button
   (`showPreviousButton = true`), and screen readers get a Back action on it either way.

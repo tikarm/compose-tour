@@ -29,9 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.CornerRadius
@@ -59,6 +57,10 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.LocalNavigationEventDispatcherOwner
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.collectLatest
 
@@ -187,7 +189,6 @@ public fun <K : Any> TourOverlay(
 }
 
 /** [TourOverlay] with [tipFocusRequester] attached to the tip, so [TourHost] can move focus there. */
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun <K : Any> TourOverlay(
     target: K?,
@@ -204,10 +205,14 @@ internal fun <K : Any> TourOverlay(
     val lastTarget = remember { LastValue<K>() }
     if (target != null) lastTarget.value = target
 
-    // Added only while the tour is shown: on Android the newest back handler wins, so this one
-    // beats any the screen added since it was first composed
-    if (onDismissRequest != null && target != null) {
-        BackHandler(onBack = onDismissRequest)
+    // Added only while the tour is shown: the newest back handler wins, so this one beats any the
+    // screen added since it was first composed. Skipped where the window has no back dispatcher,
+    // which would otherwise crash.
+    if (onDismissRequest != null && target != null && LocalNavigationEventDispatcherOwner.current != null) {
+        NavigationBackHandler(
+            state = rememberNavigationEventState(NavigationEventInfo.None),
+            onBackCompleted = onDismissRequest,
+        )
     }
 
     AnimatedVisibility(
