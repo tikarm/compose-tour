@@ -4,6 +4,8 @@ A Compose Multiplatform overlay that walks users through a screen, one element a
 the screen, cuts out the current element, and shows a tip next to it. Moving to the next step glides
 the cutout and the tip to the new element.
 
+<img src="docs/tour.gif" width="320" alt="The sample app on iOS: the tour highlights the progress card, a task, the add button and the theme button, then ends with a card in the middle of the screen">
+
 Targets: Android, iOS, desktop (JVM).
 
 ## Installation
